@@ -528,7 +528,7 @@ const Index = () => {
     
     // Header
     doc.setFontSize(20);
-    doc.text('PEDIDO - PADARIA', 20, 20);
+    doc.text('PEDIDO - PÃO DA NONA', 20, 20);
     
     doc.setFontSize(16);
     doc.text(`Fornecedor: ${supplier.name}`, 20, 35);
@@ -577,7 +577,7 @@ const Index = () => {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            🍞 Sistema de Pedidos - Padaria
+            🍞 PEDIDOS PÃO DA NONA LTDA
           </h1>
           <p className="text-gray-600">Gerencie seus fornecedores e produtos de forma intuitiva</p>
         </div>
