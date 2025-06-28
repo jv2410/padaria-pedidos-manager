@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Package, ShoppingCart } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 
 interface Product {
   id: string;
@@ -512,6 +512,66 @@ const Index = () => {
     return supplier.products.filter(p => p.orderQuantity > 0).length;
   };
 
+  const handleDownloadPDF = (supplier: Supplier) => {
+    const orderItems = supplier.products.filter(p => p.orderQuantity > 0);
+    
+    if (orderItems.length === 0) {
+      toast({
+        title: "Nenhum item no pedido",
+        description: "Adicione itens ao pedido antes de gerar o PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('PEDIDO - PADARIA', 20, 20);
+    
+    doc.setFontSize(16);
+    doc.text(`Fornecedor: ${supplier.name}`, 20, 35);
+    
+    doc.setFontSize(12);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 20, 45);
+    
+    // Table header
+    doc.setFontSize(12);
+    doc.text('PRODUTO', 20, 60);
+    doc.text('QTD PEDIDO', 140, 60);
+    
+    // Draw line under header
+    doc.line(20, 65, 190, 65);
+    
+    let yPosition = 75;
+    
+    // Add products
+    orderItems.forEach((product) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(10);
+      doc.text(product.name, 20, yPosition);
+      doc.text(product.orderQuantity.toString(), 140, yPosition);
+      yPosition += 10;
+    });
+    
+    // Footer
+    doc.setFontSize(10);
+    doc.text(`Total de itens: ${orderItems.length}`, 20, yPosition + 10);
+    
+    // Save PDF
+    doc.save(`pedido-${supplier.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "PDF gerado",
+      description: "Pedido baixado com sucesso!",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -593,6 +653,15 @@ const Index = () => {
                       {supplier.name}
                     </CardTitle>
                     <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleDownloadPDF(supplier)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <FileDown className="w-4 h-4 mr-1" />
+                        PDF
+                      </Button>
                       <Button
                         size="sm"
                         variant="secondary"
