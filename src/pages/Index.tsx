@@ -390,10 +390,13 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('1');
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingSupplierId, setEditingSupplierId] = useState<string>('');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newSupplierName, setNewSupplierName] = useState('');
   const [newProductName, setNewProductName] = useState('');
+  const [editProductName, setEditProductName] = useState('');
   const { toast } = useToast();
 
   const handleSupplierEdit = (supplier: Supplier) => {
@@ -466,6 +469,36 @@ const Index = () => {
     
     setIsProductDialogOpen(false);
     setNewProductName('');
+    setEditingSupplierId('');
+  };
+
+  const handleProductEdit = (supplierId: string, product: Product) => {
+    setEditingSupplierId(supplierId);
+    setEditingProduct(product);
+    setEditProductName(product.name);
+    setIsEditProductDialogOpen(true);
+  };
+
+  const handleProductEditSave = () => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === editingSupplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === editingProduct?.id ? { ...p, name: editProductName } : p
+            )
+          }
+        : s
+    ));
+    
+    toast({
+      title: "Produto atualizado",
+      description: "Nome do produto alterado com sucesso!",
+    });
+    
+    setIsEditProductDialogOpen(false);
+    setEditProductName('');
+    setEditingProduct(null);
     setEditingSupplierId('');
   };
 
@@ -736,6 +769,14 @@ const Index = () => {
                             
                             <Button
                               size="sm"
+                              variant="secondary"
+                              onClick={() => handleProductEdit(supplier.id, product)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            
+                            <Button
+                              size="sm"
                               variant="destructive"
                               onClick={() => handleProductDelete(supplier.id, product.id)}
                             >
@@ -791,6 +832,33 @@ const Index = () => {
                   Adicionar
                 </Button>
                 <Button variant="outline" onClick={() => setIsProductDialogOpen(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isEditProductDialogOpen} onOpenChange={setIsEditProductDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Nome do Produto</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="editProductName">Nome do Produto</Label>
+                <Input
+                  id="editProductName"
+                  value={editProductName}
+                  onChange={(e) => setEditProductName(e.target.value)}
+                  placeholder="Digite o nome do produto"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleProductEditSave} disabled={!editProductName.trim()}>
+                  Salvar
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditProductDialogOpen(false)}>
                   Cancelar
                 </Button>
               </div>
