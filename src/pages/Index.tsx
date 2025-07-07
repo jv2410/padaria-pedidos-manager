@@ -16,6 +16,8 @@ interface Product {
   currentStock: number;
   orderQuantity: number;
   price?: number;
+  price2?: number;
+  price3?: number;
 }
 
 interface PurchaseHistory {
@@ -558,6 +560,32 @@ const Index = () => {
     ));
   };
 
+  const handlePrice2Change = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, price2: value } : p
+            )
+          }
+        : s
+    ));
+  };
+
+  const handlePrice3Change = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, price3: value } : p
+            )
+          }
+        : s
+    ));
+  };
+
   const handleShowHistory = (supplier: Supplier) => {
     const supplierHistory = purchaseHistory.filter(h => h.supplierId === supplier.id);
     setCurrentSupplierHistory(supplierHistory);
@@ -813,13 +841,39 @@ const Index = () => {
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              <Label className="text-sm text-gray-600">Valor:</Label>
+                              <Label className="text-sm text-gray-600">Valor 1:</Label>
                               <Input
                                 type="number"
                                 min="0"
                                 step="0.01"
                                 value={product.price || ''}
                                 onChange={(e) => handlePriceChange(supplier.id, product.id, parseFloat(e.target.value) || 0)}
+                                className="w-24 text-center"
+                                placeholder="R$"
+                              />
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm text-gray-600">Valor 2:</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={product.price2 || ''}
+                                onChange={(e) => handlePrice2Change(supplier.id, product.id, parseFloat(e.target.value) || 0)}
+                                className="w-24 text-center"
+                                placeholder="R$"
+                              />
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm text-gray-600">Valor 3:</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={product.price3 || ''}
+                                onChange={(e) => handlePrice3Change(supplier.id, product.id, parseFloat(e.target.value) || 0)}
                                 className="w-24 text-center"
                                 placeholder="R$"
                               />
