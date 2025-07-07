@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 
@@ -15,6 +15,20 @@ interface Product {
   name: string;
   currentStock: number;
   orderQuantity: number;
+  price?: number;
+}
+
+interface PurchaseHistory {
+  id: string;
+  supplierId: string;
+  supplierName: string;
+  date: string;
+  products: Array<{
+    name: string;
+    quantity: number;
+    price?: number;
+  }>;
+  total: number;
 }
 
 interface Supplier {
@@ -391,12 +405,15 @@ const Index = () => {
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingSupplierId, setEditingSupplierId] = useState<string>('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newSupplierName, setNewSupplierName] = useState('');
   const [newProductName, setNewProductName] = useState('');
   const [editProductName, setEditProductName] = useState('');
+  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistory[]>([]);
+  const [currentSupplierHistory, setCurrentSupplierHistory] = useState<PurchaseHistory[]>([]);
   const { toast } = useToast();
 
   const handleSupplierEdit = (supplier: Supplier) => {
@@ -526,6 +543,25 @@ const Index = () => {
           }
         : s
     ));
+  };
+
+  const handlePriceChange = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, price: value } : p
+            )
+          }
+        : s
+    ));
+  };
+
+  const handleShowHistory = (supplier: Supplier) => {
+    const supplierHistory = purchaseHistory.filter(h => h.supplierId === supplier.id);
+    setCurrentSupplierHistory(supplierHistory);
+    setIsHistoryDialogOpen(true);
   };
 
   const handleOrderChange = (supplierId: string, productId: string, value: number) => {
@@ -689,6 +725,15 @@ const Index = () => {
                       <Button
                         size="sm"
                         variant="secondary"
+                        onClick={() => handleShowHistory(supplier)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <History className="w-4 h-4 mr-1" />
+                        Histórico
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
                         onClick={() => handleDownloadPDF(supplier)}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
@@ -764,6 +809,19 @@ const Index = () => {
                                 value={product.orderQuantity}
                                 onChange={(e) => handleOrderChange(supplier.id, product.id, parseInt(e.target.value) || 0)}
                                 className="w-20 text-center border-orange-300 focus:border-orange-500"
+                              />
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm text-gray-600">Valor:</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={product.price || ''}
+                                onChange={(e) => handlePriceChange(supplier.id, product.id, parseFloat(e.target.value) || 0)}
+                                className="w-24 text-center"
+                                placeholder="R$"
                               />
                             </div>
                             
@@ -860,6 +918,55 @@ const Index = () => {
                 </Button>
                 <Button variant="outline" onClick={() => setIsEditProductDialogOpen(false)}>
                   Cancelar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Histórico de Compras</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {currentSupplierHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <History className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500">Nenhum histórico de compras encontrado</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {currentSupplierHistory.map((purchase) => (
+                    <div key={purchase.id} className="p-4 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-semibold text-gray-800">{purchase.supplierName}</h4>
+                        <span className="text-sm text-gray-600">{purchase.date}</span>
+                      </div>
+                      <div className="space-y-1">
+                        {purchase.products.map((product, index) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span>{product.name}</span>
+                            <div className="flex gap-4">
+                              <span>Qtd: {product.quantity}</span>
+                              {product.price && <span>R$ {product.price.toFixed(2)}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <div className="flex justify-between font-semibold">
+                          <span>Total:</span>
+                          <span>R$ {purchase.total.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
+                  Fechar
                 </Button>
               </div>
             </div>
