@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
@@ -17,6 +18,7 @@ interface Product {
   orderQuantity: number;
   price?: number;
   price2?: number;
+  unit?: 'UNIDADE' | 'FARDO' | 'CAIXA';
 }
 
 interface PurchaseHistory {
@@ -572,6 +574,19 @@ const Index = () => {
     ));
   };
 
+  const handleUnitChange = (supplierId: string, productId: string, value: 'UNIDADE' | 'FARDO' | 'CAIXA') => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, unit: value } : p
+            )
+          }
+        : s
+    ));
+  };
+
 
   const handleShowHistory = (supplier: Supplier) => {
     const supplierHistory = purchaseHistory.filter(h => h.supplierId === supplier.id);
@@ -853,6 +868,22 @@ const Index = () => {
                               />
                             </div>
                             
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm text-gray-600">Unidade:</Label>
+                              <Select
+                                value={product.unit || ''}
+                                onValueChange={(value: 'UNIDADE' | 'FARDO' | 'CAIXA') => handleUnitChange(supplier.id, product.id, value)}
+                              >
+                                <SelectTrigger className="w-28">
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="UNIDADE">UNIDADE</SelectItem>
+                                  <SelectItem value="FARDO">FARDO</SelectItem>
+                                  <SelectItem value="CAIXA">CAIXA</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                             
                             <Button
                               size="sm"
