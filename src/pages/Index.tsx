@@ -625,7 +625,8 @@ const Index = () => {
     // Table header
     doc.setFontSize(12);
     doc.text('PRODUTO', 20, 60);
-    doc.text('QTD PEDIDO', 140, 60);
+    doc.text('QTD PEDIDO', 110, 60);
+    doc.text('UNIDADE', 160, 60);
     
     // Draw line under header
     doc.line(20, 65, 190, 65);
@@ -641,7 +642,8 @@ const Index = () => {
       
       doc.setFontSize(10);
       doc.text(product.name, 20, yPosition);
-      doc.text(product.orderQuantity.toString(), 140, yPosition);
+      doc.text(product.orderQuantity.toString(), 110, yPosition);
+      doc.text(product.unit || 'UNIDADE', 160, yPosition);
       yPosition += 10;
     });
     
