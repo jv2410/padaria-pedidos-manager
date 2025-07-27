@@ -1046,26 +1046,26 @@ const Index = () => {
                   <p className="text-gray-500">Nenhum histórico de compras encontrado</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {currentSupplierHistory.map((purchase) => (
-                    <div key={purchase.id} className="p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="font-semibold text-gray-800">{purchase.supplierName}</h4>
-                        <span className="text-sm text-gray-600">{purchase.date}</span>
-                      </div>
-                      <div className="space-y-1">
-                        {purchase.products.map((product, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span>{product.name}</span>
-                            <div className="flex gap-4">
-                              <span>Estoque: {product.stock}</span>
-                              <span>Pedido: {product.quantity}</span>
-                              <span>Unidade: {product.unit || 'UNIDADE'}</span>
-                              {product.price && <span>R$ {product.price.toFixed(2)}</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                 <div className="space-y-4 max-h-96 overflow-y-auto">
+                   {currentSupplierHistory.map((purchase) => (
+                     <div key={purchase.id} className="p-4 bg-gray-50 rounded-lg">
+                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
+                         <h4 className="font-semibold text-gray-800">{purchase.supplierName}</h4>
+                         <span className="text-sm text-gray-600">{purchase.date}</span>
+                       </div>
+                       <div className="space-y-2">
+                         {purchase.products.map((product, index) => (
+                           <div key={index} className="space-y-1">
+                             <div className="font-medium text-sm">{product.name}</div>
+                             <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+                               <span className="bg-white px-2 py-1 rounded border">Estoque: {product.stock}</span>
+                               <span className="bg-white px-2 py-1 rounded border">Pedido: {product.quantity}</span>
+                               <span className="bg-white px-2 py-1 rounded border">Unidade: {product.unit || 'UNIDADE'}</span>
+                               {product.price && <span className="bg-white px-2 py-1 rounded border">R$ {product.price.toFixed(2)}</span>}
+                             </div>
+                           </div>
+                          ))}
+                        </div>
                       <div className="mt-2 pt-2 border-t border-gray-200">
                         <div className="flex justify-between font-semibold">
                           <span>Total:</span>
