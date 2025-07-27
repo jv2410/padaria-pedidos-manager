@@ -664,9 +664,14 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            🍞 PEDIDOS PÃO DA NONA LTDA
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <h1 className="text-4xl font-bold text-gray-800">
+              🍞 PEDIDOS PÃO DA NONA LTDA
+            </h1>
+            <Button variant="outline" size="sm">
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
           <p className="text-gray-600">Gerencie seus fornecedores e produtos de forma intuitiva</p>
         </div>
 
