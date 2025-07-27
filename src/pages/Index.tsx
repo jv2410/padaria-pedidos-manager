@@ -7,9 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -417,6 +421,7 @@ const Index = () => {
   const [editProductName, setEditProductName] = useState('');
   const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistory[]>([]);
   const [currentSupplierHistory, setCurrentSupplierHistory] = useState<PurchaseHistory[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const { toast } = useToast();
 
   const handleSupplierEdit = (supplier: Supplier) => {
@@ -577,7 +582,14 @@ const Index = () => {
 
 
   const handleShowHistory = (supplier: Supplier) => {
-    const supplierHistory = purchaseHistory.filter(h => h.supplierId === supplier.id);
+    let supplierHistory = purchaseHistory.filter(h => h.supplierId === supplier.id);
+    
+    // Filter by selected date if date is selected
+    if (selectedDate) {
+      const selectedDateStr = selectedDate.toLocaleDateString('pt-BR');
+      supplierHistory = supplierHistory.filter(h => h.date === selectedDateStr);
+    }
+    
     setCurrentSupplierHistory(supplierHistory);
     setIsHistoryDialogOpen(true);
   };
@@ -785,6 +797,30 @@ const Index = () => {
                         <History className="w-4 h-4 mr-1" />
                         Histórico
                       </Button>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className={cn(
+                              "bg-indigo-600 hover:bg-indigo-700 text-white",
+                              !selectedDate && "text-white"
+                            )}
+                          >
+                            <CalendarIcon className="w-4 h-4 mr-1" />
+                            {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Data"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <Button
                         size="sm"
                         variant="secondary"
