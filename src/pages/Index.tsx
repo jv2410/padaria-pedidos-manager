@@ -29,6 +29,7 @@ interface PurchaseHistory {
     name: string;
     quantity: number;
     price?: number;
+    unit?: 'UNIDADE' | 'FARDO' | 'CAIXA';
   }>;
   total: number;
 }
@@ -631,9 +632,8 @@ const Index = () => {
     // Draw line under header
     doc.line(20, 65, 190, 65);
     
+    // Table content
     let yPosition = 75;
-    
-    // Add products
     orderItems.forEach((product) => {
       if (yPosition > 270) {
         doc.addPage();
@@ -650,6 +650,36 @@ const Index = () => {
     // Footer
     doc.setFontSize(10);
     doc.text(`Total de itens: ${orderItems.length}`, 20, yPosition + 10);
+    
+    // Save to history
+    const currentDate = new Date().toLocaleDateString('pt-BR');
+    const totalPrice = orderItems.reduce((sum, item) => sum + (item.price || 0) * item.orderQuantity, 0);
+    
+    const newPurchase: PurchaseHistory = {
+      id: `${supplier.id}-${Date.now()}`,
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      date: currentDate,
+      products: orderItems.map(item => ({
+        name: item.name,
+        quantity: item.orderQuantity,
+        price: item.price,
+        unit: item.unit
+      })),
+      total: totalPrice
+    };
+    
+    setPurchaseHistory(prev => [newPurchase, ...prev]);
+    
+    // Clear order quantities after saving to history
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplier.id
+        ? {
+            ...s,
+            products: s.products.map(p => ({ ...p, orderQuantity: 0 }))
+          }
+        : s
+    ));
     
     // Save PDF
     doc.save(`pedido-${supplier.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -991,6 +1021,7 @@ const Index = () => {
                             <span>{product.name}</span>
                             <div className="flex gap-4">
                               <span>Qtd: {product.quantity}</span>
+                              <span>Unidade: {product.unit || 'UNIDADE'}</span>
                               {product.price && <span>R$ {product.price.toFixed(2)}</span>}
                             </div>
                           </div>
