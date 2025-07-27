@@ -32,6 +32,7 @@ interface PurchaseHistory {
   products: Array<{
     name: string;
     quantity: number;
+    stock: number;
     price?: number;
     unit?: 'UNIDADE' | 'FARDO' | 'CAIXA';
   }>;
@@ -675,6 +676,7 @@ const Index = () => {
       products: orderItems.map(item => ({
         name: item.name,
         quantity: item.orderQuantity,
+        stock: item.currentStock,
         price: item.price,
         unit: item.unit
       })),
@@ -1056,7 +1058,8 @@ const Index = () => {
                           <div key={index} className="flex justify-between text-sm">
                             <span>{product.name}</span>
                             <div className="flex gap-4">
-                              <span>Qtd: {product.quantity}</span>
+                              <span>Estoque: {product.stock}</span>
+                              <span>Pedido: {product.quantity}</span>
                               <span>Unidade: {product.unit || 'UNIDADE'}</span>
                               {product.price && <span>R$ {product.price.toFixed(2)}</span>}
                             </div>
