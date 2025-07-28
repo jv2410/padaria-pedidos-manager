@@ -154,6 +154,11 @@ const Landing = () => {
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-foreground">R$ 39,00</span>
                   <span className="text-muted-foreground">/mês</span>
+                  <div className="mt-2">
+                    <span className="text-sm text-green-600 font-medium">
+                      🎁 7 dias grátis para novos usuários
+                    </span>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

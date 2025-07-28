@@ -6,6 +6,8 @@ interface SubscriptionInfo {
   subscribed: boolean;
   subscription_tier?: string;
   subscription_end?: string;
+  is_trialing?: boolean;
+  trial_end?: string;
 }
 
 interface AuthContextType {
@@ -62,6 +64,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscribed: data.subscribed || false,
         subscription_tier: data.subscription_tier,
         subscription_end: data.subscription_end,
+        is_trialing: data.is_trialing || false,
+        trial_end: data.trial_end,
       });
     } catch (error) {
       console.error('Error checking subscription:', error);

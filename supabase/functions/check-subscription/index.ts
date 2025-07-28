@@ -45,11 +45,39 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Check if user is admin (creator) - replace with your email
+    const adminEmails = ["seu-email@exemplo.com"]; // TODO: Replace with your actual email
+    const isAdmin = adminEmails.includes(user.email);
+    logStep("Admin check", { isAdmin, email: user.email });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
+      logStep("No customer found, checking admin status");
+      
+      if (isAdmin) {
+        logStep("Admin user detected, granting full access");
+        await supabaseClient.from("subscribers").upsert({
+          email: user.email,
+          user_id: user.id,
+          stripe_customer_id: null,
+          subscribed: true,
+          subscription_tier: "Admin",
+          subscription_end: null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'email' });
+        return new Response(JSON.stringify({ 
+          subscribed: true, 
+          subscription_tier: "Admin",
+          subscription_end: null
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      
+      logStep("Regular user with no customer, updating unsubscribed state");
       await supabaseClient.from("subscribers").upsert({
         email: user.email,
         user_id: user.id,
@@ -68,19 +96,43 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // Check for both active and trialing subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      status: "all",
+      limit: 10,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+    
+    // Find active or trialing subscription
+    const activeOrTrialingSub = subscriptions.data.find(sub => 
+      sub.status === "active" || sub.status === "trialing"
+    );
+    
+    const hasActiveSub = !!activeOrTrialingSub;
     let subscriptionTier = null;
     let subscriptionEnd = null;
+    let isTrialing = false;
+    let trialEnd = null;
 
     if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+      const subscription = activeOrTrialingSub;
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
+      isTrialing = subscription.status === "trialing";
+      
+      if (isTrialing && subscription.trial_end) {
+        trialEnd = new Date(subscription.trial_end * 1000).toISOString();
+        logStep("Trial subscription found", { 
+          subscriptionId: subscription.id, 
+          trialEnd,
+          status: subscription.status 
+        });
+      } else {
+        logStep("Active subscription found", { 
+          subscriptionId: subscription.id, 
+          endDate: subscriptionEnd,
+          status: subscription.status 
+        });
+      }
       
       // Determina o tier baseado no preço (R$ 39,00 = OrderFlow Pro)
       const priceId = subscription.items.data[0].price.id;
@@ -88,13 +140,38 @@ serve(async (req) => {
       const amount = price.unit_amount || 0;
       
       if (amount === 3900) { // R$ 39,00 em centavos
-        subscriptionTier = "OrderFlow Pro";
+        subscriptionTier = isTrialing ? "OrderFlow Pro (Trial)" : "OrderFlow Pro";
       } else {
-        subscriptionTier = "Premium"; // fallback
+        subscriptionTier = isTrialing ? "Premium (Trial)" : "Premium"; // fallback
       }
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
+      logStep("Determined subscription tier", { 
+        priceId, 
+        amount, 
+        subscriptionTier, 
+        isTrialing 
+      });
+    } else if (isAdmin) {
+      // Admin override
+      logStep("Admin user with no subscription, granting admin access");
+      await supabaseClient.from("subscribers").upsert({
+        email: user.email,
+        user_id: user.id,
+        stripe_customer_id: customerId,
+        subscribed: true,
+        subscription_tier: "Admin",
+        subscription_end: null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
+      return new Response(JSON.stringify({
+        subscribed: true,
+        subscription_tier: "Admin",
+        subscription_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     } else {
-      logStep("No active subscription found");
+      logStep("No active or trial subscription found");
     }
 
     await supabaseClient.from("subscribers").upsert({
@@ -107,11 +184,19 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    logStep("Updated database with subscription info", { 
+      subscribed: hasActiveSub, 
+      subscriptionTier, 
+      isTrialing,
+      trialEnd 
+    });
+    
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      is_trialing: isTrialing,
+      trial_end: trialEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

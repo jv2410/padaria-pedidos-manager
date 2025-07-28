@@ -56,7 +56,7 @@ serve(async (req) => {
       logStep("No existing customer found, will create new one");
     }
 
-    // Create a subscription session for R$ 39,00/mês
+    // Create a subscription session for R$ 39,00/mês with 7-day trial
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -66,7 +66,7 @@ serve(async (req) => {
             currency: "brl",
             product_data: { 
               name: "OrderFlow Pro - Plano Único",
-              description: "Acesso completo ao sistema de gestão de fornecedores"
+              description: "Acesso completo ao sistema de gestão de fornecedores + 7 dias grátis"
             },
             unit_amount: 3900, // R$ 39,00 em centavos
             recurring: { interval: "month" },
@@ -75,6 +75,9 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      subscription_data: {
+        trial_period_days: 7,
+      },
       success_url: `${req.headers.get("origin")}/dashboard?success=true`,
       cancel_url: `${req.headers.get("origin")}/?canceled=true`,
     });

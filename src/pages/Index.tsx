@@ -787,12 +787,24 @@ const Index = () => {
                   <CardTitle className="text-lg">
                     Status da Assinatura
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {subscription.subscribed 
-                      ? `Plano ${subscription.subscription_tier} ativo` 
-                      : 'Nenhuma assinatura ativa'
-                    }
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">
+                      {subscription.subscribed 
+                        ? `Plano ${subscription.subscription_tier} ativo` 
+                        : 'Nenhuma assinatura ativa'
+                      }
+                    </p>
+                    {subscription.is_trialing && subscription.trial_end && (
+                      <p className="text-xs text-orange-600 font-medium">
+                        🎁 Trial até: {new Date(subscription.trial_end).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                    {subscription.subscription_tier === "Admin" && (
+                      <p className="text-xs text-blue-600 font-medium">
+                        👑 Acesso de Criador
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -805,14 +817,16 @@ const Index = () => {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Atualizar
                 </Button>
-                <Button
-                  variant={subscription.subscribed ? "outline" : "default"}
-                  size="sm"
-                  onClick={handleManageSubscription}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  {subscription.subscribed ? 'Gerenciar' : 'Assinar'}
-                </Button>
+                {subscription.subscription_tier !== "Admin" && (
+                  <Button
+                    variant={subscription.subscribed ? "outline" : "default"}
+                    size="sm"
+                    onClick={handleManageSubscription}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    {subscription.subscribed ? 'Gerenciar' : 'Assinar'}
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
