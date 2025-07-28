@@ -9,12 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History, CalendarIcon, LogOut, User } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History, CalendarIcon, LogOut, User, CreditCard, Settings, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/components/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Product {
   id: string;
@@ -425,7 +426,43 @@ const Index = () => {
   const [currentSupplierHistory, setCurrentSupplierHistory] = useState<PurchaseHistory[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, signOut, subscription, checkSubscription, session } = useAuth();
+
+  const handleManageSubscription = async () => {
+    if (!subscription.subscribed) {
+      // Redireciona para a landing page para assinar
+      window.location.href = '/';
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error creating portal session:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao abrir portal de gerenciamento.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Abre o portal do Stripe em nova aba
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao abrir portal de gerenciamento.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -737,6 +774,59 @@ const Index = () => {
             </Button>
           </div>
         </div>
+
+        {/* Card de Status da Assinatura */}
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${subscription.subscribed ? 'bg-green-100' : 'bg-orange-100'}`}>
+                  <CreditCard className={`h-5 w-5 ${subscription.subscribed ? 'text-green-600' : 'text-orange-600'}`} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">
+                    Status da Assinatura
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {subscription.subscribed 
+                      ? `Plano ${subscription.subscription_tier} ativo` 
+                      : 'Nenhuma assinatura ativa'
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={checkSubscription}
+                  disabled={!session}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Atualizar
+                </Button>
+                <Button
+                  variant={subscription.subscribed ? "outline" : "default"}
+                  size="sm"
+                  onClick={handleManageSubscription}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  {subscription.subscribed ? 'Gerenciar' : 'Assinar'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          {subscription.subscribed && subscription.subscription_end && (
+            <CardContent className="pt-0">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarIcon className="h-4 w-4" />
+                <span>
+                  Próxima cobrança: {new Date(subscription.subscription_end).toLocaleDateString('pt-BR')}
+                </span>
+              </div>
+            </CardContent>
+          )}
+        </Card>
 
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-4 mb-2">

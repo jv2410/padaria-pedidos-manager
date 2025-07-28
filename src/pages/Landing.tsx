@@ -2,10 +2,40 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Users, FileText, BarChart3, Check, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Users, FileText, BarChart3, Check, ArrowRight, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/components/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Landing = () => {
+  const { user, session } = useAuth();
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      // Redireciona para auth se não estiver logado
+      window.location.href = '/auth';
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error creating checkout:', error);
+        return;
+      }
+
+      // Abre o Stripe Checkout em nova aba
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const features = [
     {
       icon: <ShoppingCart className="h-6 w-6" />,
@@ -153,11 +183,10 @@ const Landing = () => {
                     <span className="text-sm">Interface intuitiva e responsiva</span>
                   </li>
                 </ul>
-                <Link to="/auth" className="block">
-                  <Button className="w-full">
-                    Começar agora
-                  </Button>
-                </Link>
+                <Button onClick={handleSubscribe} className="w-full">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  {user ? 'Assinar Agora' : 'Criar Conta e Assinar'}
+                </Button>
               </CardContent>
             </Card>
           </div>
