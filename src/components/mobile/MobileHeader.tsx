@@ -7,6 +7,7 @@ interface MobileHeaderProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
   userName: string;
+  establishmentName: string;
   onSignOut: () => void;
 }
 
@@ -14,6 +15,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   isMobileMenuOpen,
   setIsMobileMenuOpen,
   userName,
+  establishmentName,
   onSignOut
 }) => {
   return (
@@ -27,7 +29,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
         >
           {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
-        <h1 className="font-semibold text-lg text-foreground">Pão da Nona</h1>
+        <h1 className="font-semibold text-lg text-foreground truncate max-w-40">{establishmentName}</h1>
       </div>
       
       <div className="flex items-center gap-2">

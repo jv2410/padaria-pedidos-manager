@@ -419,6 +419,9 @@ const Index = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [activeTab, setActiveTab] = useState('1');
   const [mobileActiveTab, setMobileActiveTab] = useState('suppliers');
+  const [establishmentName, setEstablishmentName] = useState('PEDIDOS PÃO DA NONA LTDA');
+  const [isEditingEstablishment, setIsEditingEstablishment] = useState(false);
+  const [tempEstablishmentName, setTempEstablishmentName] = useState('');
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
@@ -441,6 +444,37 @@ const Index = () => {
   
   const { toast } = useToast();
   const { user, signOut, subscription, checkSubscription, session } = useAuth();
+
+  // Load establishment name from localStorage on component mount
+  React.useEffect(() => {
+    const savedName = localStorage.getItem('establishmentName');
+    if (savedName) {
+      setEstablishmentName(savedName);
+    }
+  }, []);
+
+  const handleEditEstablishment = () => {
+    setTempEstablishmentName(establishmentName);
+    setIsEditingEstablishment(true);
+  };
+
+  const handleSaveEstablishment = () => {
+    if (tempEstablishmentName.trim()) {
+      setEstablishmentName(tempEstablishmentName.trim());
+      localStorage.setItem('establishmentName', tempEstablishmentName.trim());
+      toast({
+        title: "Nome atualizado",
+        description: "Nome do estabelecimento foi atualizado com sucesso!",
+      });
+    }
+    setIsEditingEstablishment(false);
+    setTempEstablishmentName('');
+  };
+
+  const handleCancelEditEstablishment = () => {
+    setIsEditingEstablishment(false);
+    setTempEstablishmentName('');
+  };
 
   const handleManageSubscription = async () => {
     if (!subscription.subscribed) {
@@ -689,7 +723,7 @@ const Index = () => {
     
     // Header
     doc.setFontSize(20);
-    doc.text('PEDIDO - PÃO DA NONA', 20, 20);
+    doc.text(`PEDIDO - ${establishmentName}`, 20, 20);
     
     doc.setFontSize(16);
     doc.text(`Fornecedor: ${supplier.name}`, 20, 35);
@@ -824,6 +858,7 @@ const Index = () => {
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
           userName={user?.email?.split('@')[0] || 'Usuário'}
+          establishmentName={establishmentName}
           onSignOut={handleSignOut}
         />
         
@@ -990,9 +1025,9 @@ const Index = () => {
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-4 mb-2">
             <h1 className="text-4xl font-bold text-gray-800">
-              🍞 PEDIDOS PÃO DA NONA LTDA
+              🍞 {establishmentName}
             </h1>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleEditEstablishment}>
               <Edit className="h-4 w-4" />
             </Button>
           </div>
@@ -1041,6 +1076,35 @@ const Index = () => {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Dialog para edição do nome do estabelecimento */}
+        <Dialog open={isEditingEstablishment} onOpenChange={setIsEditingEstablishment}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Nome do Estabelecimento</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="establishmentName">Nome do Estabelecimento</Label>
+                <Input
+                  id="establishmentName"
+                  value={tempEstablishmentName}
+                  onChange={(e) => setTempEstablishmentName(e.target.value)}
+                  placeholder="Digite o nome do estabelecimento"
+                  className="mt-2"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSaveEstablishment} disabled={!tempEstablishmentName.trim()}>
+                  Salvar
+                </Button>
+                <Button variant="outline" onClick={handleCancelEditEstablishment}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-6 lg:grid-cols-13 gap-1 h-auto p-2 bg-white/50 backdrop-blur-sm rounded-lg mb-6">
