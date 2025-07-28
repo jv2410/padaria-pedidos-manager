@@ -9,11 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History, CalendarIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Package, ShoppingCart, FileDown, History, CalendarIcon, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/components/AuthContext';
 
 interface Product {
   id: string;
@@ -424,6 +425,15 @@ const Index = () => {
   const [currentSupplierHistory, setCurrentSupplierHistory] = useState<PurchaseHistory[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado com sucesso.",
+    });
+  };
 
   const handleSupplierEdit = (supplier: Supplier) => {
     setEditingSupplier(supplier);
@@ -707,6 +717,27 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Header com informações do usuário */}
+        <div className="mb-6 flex justify-between items-center bg-white/70 backdrop-blur-sm rounded-lg p-4 shadow-sm">
+          <div className="flex items-center gap-4">
+            <ShoppingCart className="h-8 w-8 text-primary" />
+            <div>
+              <h1 className="text-xl font-bold text-foreground">OrderFlow Pro</h1>
+              <p className="text-sm text-muted-foreground">Sistema de gestão de fornecedores</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">{user?.email}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          </div>
+        </div>
+
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-4 mb-2">
             <h1 className="text-4xl font-bold text-gray-800">
