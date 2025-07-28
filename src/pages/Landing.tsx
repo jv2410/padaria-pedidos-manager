@@ -9,13 +9,13 @@ const Landing = () => {
   const features = [
     {
       icon: <ShoppingCart className="h-6 w-6" />,
-      title: "Gestão de Fornecedores",
-      description: "Organize seus fornecedores com produtos predefinidos e personalizáveis"
+      title: "26 Fornecedores Pré-cadastrados",
+      description: "Acesso imediato a fornecedores organizados com produtos predefinidos"
     },
     {
       icon: <FileText className="h-6 w-6" />,
-      title: "Pedidos Automatizados",
-      description: "Gere PDFs de pedidos automaticamente com controle de estoque"
+      title: "Geração Automática de PDFs",
+      description: "Crie pedidos profissionais em PDF com controle de estoque"
     },
     {
       icon: <BarChart3 className="h-6 w-6" />,
@@ -24,55 +24,8 @@ const Landing = () => {
     },
     {
       icon: <Users className="h-6 w-6" />,
-      title: "Multi-usuário",
-      description: "Cada usuário tem seus próprios dados isolados e seguros"
-    }
-  ];
-
-  const plans = [
-    {
-      name: "Básico",
-      price: "R$ 29,90",
-      period: "/mês",
-      description: "Ideal para pequenos negócios",
-      features: [
-        "Até 10 fornecedores",
-        "Geração de PDFs",
-        "Controle de estoque básico",
-        "Histórico de pedidos",
-        "Suporte por email"
-      ],
-      popular: false
-    },
-    {
-      name: "Profissional",
-      price: "R$ 59,90",
-      period: "/mês",
-      description: "Para empresas em crescimento",
-      features: [
-        "Fornecedores ilimitados",
-        "Relatórios avançados",
-        "Análise de tendências",
-        "Exportação de dados",
-        "Suporte prioritário",
-        "Personalização completa"
-      ],
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "R$ 99,90",
-      period: "/mês",
-      description: "Para grandes organizações",
-      features: [
-        "Tudo do Profissional",
-        "Multi-usuários (equipe)",
-        "API de integração",
-        "Log de atividades",
-        "Suporte 24/7",
-        "Backup automático"
-      ],
-      popular: false
+      title: "Sistema Isolado por Usuário",
+      description: "Seus dados são completamente privados e seguros"
     }
   ];
 
@@ -154,48 +107,59 @@ const Landing = () => {
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Planos Simples e Transparentes
+              Acesso Completo por Apenas
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Escolha o plano ideal para o seu negócio. Todos incluem dados ilimitados e suporte.
+              Um valor justo para todas as funcionalidades do sistema, sem limites ou surpresas.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary">
-                    Mais Popular
-                  </Badge>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/auth" className="block">
-                    <Button 
-                      className="w-full" 
-                      variant={plan.popular ? "default" : "outline"}
-                    >
-                      Começar agora
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center">
+            <Card className="relative border-primary shadow-lg max-w-md w-full">
+              <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary">
+                Plano Único
+              </Badge>
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">OrderFlow Pro</CardTitle>
+                <CardDescription>Sistema completo de gestão</CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-foreground">R$ 39,00</span>
+                  <span className="text-muted-foreground">/mês</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">26 fornecedores pré-cadastrados</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Controle de estoque personalizado</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Geração automática de PDFs</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Histórico completo de compras</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Sistema isolado por usuário</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Interface intuitiva e responsiva</span>
+                  </li>
+                </ul>
+                <Link to="/auth" className="block">
+                  <Button className="w-full">
+                    Começar agora
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
