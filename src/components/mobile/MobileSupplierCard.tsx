@@ -38,34 +38,34 @@ export const MobileSupplierCard: React.FC<MobileSupplierCardProps> = ({
   const totalOrderQuantity = supplier.products.reduce((sum, product) => sum + product.orderQuantity, 0);
 
   return (
-    <Card className="w-full hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
+    <Card className="w-full animate-slide-up">
+      <CardContent className="p-5">
+        <div className="flex flex-col gap-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg text-foreground truncate flex-1">
+            <h3 className="font-semibold text-xl text-foreground truncate flex-1">
               {supplier.name}
             </h3>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border-primary/20">
               {totalProducts} produtos
             </Badge>
           </div>
 
           {/* Order Info */}
           {totalOrderQuantity > 0 && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <ShoppingCart className="h-4 w-4" />
-              <span>{totalOrderQuantity} itens no pedido</span>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+              <ShoppingCart className="h-4 w-4 text-success" />
+              <span className="text-sm font-medium text-success">{totalOrderQuantity} itens no pedido</span>
             </div>
           )}
 
           {/* Actions */}
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              size="sm"
+              variant="warm"
+              size="touch"
               onClick={() => onViewProducts(supplier)}
-              className="flex-1"
+              className="flex-1 rounded-xl"
             >
               <Package className="h-4 w-4 mr-2" />
               Ver Produtos
@@ -73,29 +73,29 @@ export const MobileSupplierCard: React.FC<MobileSupplierCardProps> = ({
             
             {totalOrderQuantity > 0 && (
               <Button
-                variant="default"
-                size="sm"
+                variant="success"
+                size="touch"
                 onClick={() => onDownloadOrder(supplier)}
-                className="px-3"
+                className="px-4 rounded-xl"
               >
                 <ShoppingCart className="h-4 w-4" />
               </Button>
             )}
             
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
+              size="touch"
               onClick={() => onEditSupplier(supplier)}
-              className="px-3"
+              className="px-4 rounded-xl"
             >
               <Edit className="h-4 w-4" />
             </Button>
             
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
+              size="touch"
               onClick={() => onDeleteSupplier(supplier.id)}
-              className="px-3 text-destructive hover:text-destructive"
+              className="px-4 text-destructive hover:text-destructive hover:border-destructive/50 rounded-xl"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

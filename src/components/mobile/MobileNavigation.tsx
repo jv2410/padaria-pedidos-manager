@@ -32,23 +32,24 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 top-14 z-40 bg-background lg:hidden">
+    <div className="fixed inset-0 top-16 z-40 bg-gradient-warm backdrop-blur-sm lg:hidden animate-slide-up">
       <div className="flex flex-col h-full">
         {/* Navigation Items */}
-        <div className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => {
+        <div className="flex-1 p-6 space-y-3">
+          {navItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <Button
                 key={item.id}
-                variant={activeTab === item.id ? "default" : "ghost"}
+                variant={activeTab === item.id ? "warm" : "ghost"}
                 className={cn(
-                  "w-full justify-start h-12 text-base",
-                  activeTab === item.id && "bg-primary text-primary-foreground"
+                  "w-full justify-start h-14 text-lg font-medium rounded-2xl transition-all duration-300 animate-slide-up touch-target",
+                  activeTab === item.id && "shadow-elevated"
                 )}
+                style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => onTabChange(item.id)}
               >
-                <Icon className="h-5 w-5 mr-3" />
+                <Icon className="h-6 w-6 mr-4" />
                 {item.label}
               </Button>
             );
@@ -56,30 +57,30 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         </div>
 
         {/* Subscription Section */}
-        <div className="border-t border-border p-4 space-y-3">
-          <div className="text-sm">
-            <div className="font-medium text-foreground">Plano Atual</div>
-            <div className="text-muted-foreground">
+        <div className="border-t border-border/50 p-6 space-y-4 bg-card/50 backdrop-blur-sm rounded-t-3xl">
+          <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
+            <div className="font-semibold text-foreground text-base">Plano Atual</div>
+            <div className="text-primary font-medium">
               {subscriptionInfo.tier} - {subscriptionInfo.status}
             </div>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start h-12 rounded-xl touch-target"
               onClick={onManageSubscription}
             >
-              <CreditCard className="h-4 w-4 mr-2" />
+              <CreditCard className="h-5 w-5 mr-3" />
               Gerenciar Assinatura
             </Button>
             
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start h-12 rounded-xl touch-target"
               onClick={onRefreshData}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-5 w-5 mr-3" />
               Atualizar Dados
             </Button>
           </div>
