@@ -2037,6 +2037,42 @@ export type Database = {
           },
         ]
       }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscription_plans: {
         Row: {
           active: boolean
@@ -2251,6 +2287,122 @@ export type Database = {
           },
         ]
       }
+      user_products: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          current_stock: number | null
+          id: string
+          name: string
+          order_quantity: number | null
+          price: number | null
+          product_id: string
+          unit: string | null
+          updated_at: string
+          user_id: string
+          user_supplier_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          current_stock?: number | null
+          id?: string
+          name: string
+          order_quantity?: number | null
+          price?: number | null
+          product_id: string
+          unit?: string | null
+          updated_at?: string
+          user_id: string
+          user_supplier_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          current_stock?: number | null
+          id?: string
+          name?: string
+          order_quantity?: number | null
+          price?: number | null
+          product_id?: string
+          unit?: string | null
+          updated_at?: string
+          user_id?: string
+          user_supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_products_user_supplier_id_fkey"
+            columns: ["user_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "user_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_purchase_history: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          products: Json
+          supplier_id: string
+          supplier_name: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          products?: Json
+          supplier_id: string
+          supplier_name: string
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          products?: Json
+          supplier_id?: string
+          supplier_name?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_suppliers: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          name: string
+          supplier_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          name: string
+          supplier_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          name?: string
+          supplier_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2263,6 +2415,10 @@ export type Database = {
       increment_view_count: {
         Args: { row_id: string }
         Returns: number
+      }
+      initialize_user_data: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
