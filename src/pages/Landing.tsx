@@ -90,15 +90,12 @@ const Landing = () => {
             Sistema SaaS completo para controle de estoque, fornecedores e pedidos. 
             Mais de 26 fornecedores pré-cadastrados prontos para usar.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link to="/auth">
               <Button size="lg" className="w-full sm:w-auto">
                 Começar gratuitamente
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-              Ver demonstração
-            </Button>
           </div>
         </div>
       </section>
