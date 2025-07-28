@@ -46,7 +46,7 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Check if user is admin (creator) - replace with your email
-    const adminEmails = ["seu-email@exemplo.com"]; // TODO: Replace with your actual email
+    const adminEmails = ["paodanonafornecedores@gmail.com"]; // TODO: Replace with your actual email
     const isAdmin = adminEmails.includes(user.email);
     logStep("Admin check", { isAdmin, email: user.email });
 
