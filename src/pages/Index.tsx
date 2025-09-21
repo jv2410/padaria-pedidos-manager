@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -445,79 +445,13 @@ const Index = () => {
   const { toast } = useToast();
   const { user, signOut, subscription, checkSubscription, session } = useAuth();
 
-  // Load data on component mount
-  useEffect(() => {
+  // Load establishment name from localStorage on component mount
+  React.useEffect(() => {
     const savedName = localStorage.getItem('establishmentName');
     if (savedName) {
       setEstablishmentName(savedName);
     }
-    
-    if (user) {
-      loadUserData();
-    }
-  }, [user]);
-
-  const loadUserData = async () => {
-    if (!user) return;
-
-    try {
-      // Load user suppliers
-      const { data: userSuppliers, error: suppliersError } = await supabase
-        .from('user_suppliers')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (suppliersError) {
-        console.error('Error loading suppliers:', suppliersError);
-        return;
-      }
-
-      if (!userSuppliers || userSuppliers.length === 0) {
-        // Use initial suppliers if no user data exists
-        setSuppliers(initialSuppliers);
-        return;
-      }
-
-      // Load products for each supplier
-      const suppliersWithProducts: Supplier[] = [];
-      
-      for (const supplier of userSuppliers) {
-        const { data: userProducts, error: productsError } = await supabase
-          .from('user_products')
-          .select('*')
-          .eq('user_supplier_id', supplier.id);
-
-        if (productsError) {
-          console.error('Error loading products for supplier:', supplier.id, productsError);
-          continue;
-        }
-
-        const products: Product[] = (userProducts || []).map(product => ({
-          id: product.product_id,
-          name: product.name,
-          currentStock: product.current_stock || 0,
-          orderQuantity: product.order_quantity || 0,
-          price: product.price || undefined,
-          unit: (product.unit as 'UNIDADE' | 'FARDO' | 'CAIXA') || undefined
-        }));
-
-        suppliersWithProducts.push({
-          id: supplier.supplier_id,
-          name: supplier.name,
-          products
-        });
-      }
-
-      setSuppliers(suppliersWithProducts);
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar dados do usuário.",
-        variant: "destructive",
-      });
-    }
-  };
+  }, []);
 
   const handleEditEstablishment = () => {
     setTempEstablishmentName(establishmentName);
@@ -592,103 +526,41 @@ const Index = () => {
     setIsSupplierDialogOpen(true);
   };
 
-  const handleSupplierSave = async () => {
-    if (!user) return;
-
-    try {
-      if (editingSupplier) {
-        // Update existing supplier
-        const { error } = await supabase
-          .from('user_suppliers')
-          .update({ name: newSupplierName })
-          .eq('user_id', user.id)
-          .eq('supplier_id', editingSupplier.id);
-
-        if (error) throw error;
-
-        setSuppliers(prev => prev.map(s => 
-          s.id === editingSupplier.id ? { ...s, name: newSupplierName } : s
-        ));
-        toast({
-          title: "Fornecedor atualizado",
-          description: "Nome do fornecedor alterado com sucesso!",
-        });
-      } else {
-        // Create new supplier
-        const supplierId = Date.now().toString();
-        const { error } = await supabase
-          .from('user_suppliers')
-          .insert({
-            user_id: user.id,
-            supplier_id: supplierId,
-            name: newSupplierName
-          });
-
-        if (error) throw error;
-
-        const newSupplier: Supplier = {
-          id: supplierId,
-          name: newSupplierName,
-          products: []
-        };
-        setSuppliers(prev => [...prev, newSupplier]);
-        toast({
-          title: "Fornecedor adicionado",
-          description: "Novo fornecedor criado com sucesso!",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving supplier:', error);
+  const handleSupplierSave = () => {
+    if (editingSupplier) {
+      setSuppliers(prev => prev.map(s => 
+        s.id === editingSupplier.id ? { ...s, name: newSupplierName } : s
+      ));
       toast({
-        title: "Erro",
-        description: "Erro ao salvar fornecedor.",
-        variant: "destructive",
+        title: "Fornecedor atualizado",
+        description: "Nome do fornecedor alterado com sucesso!",
+      });
+    } else {
+      const newSupplier: Supplier = {
+        id: Date.now().toString(),
+        name: newSupplierName,
+        products: []
+      };
+      setSuppliers(prev => [...prev, newSupplier]);
+      toast({
+        title: "Fornecedor adicionado",
+        description: "Novo fornecedor criado com sucesso!",
       });
     }
-
     setIsSupplierDialogOpen(false);
     setEditingSupplier(null);
     setNewSupplierName('');
   };
 
-  const handleSupplierDelete = async (supplierId: string) => {
-    if (!user) return;
-
-    try {
-      // Delete all products first
-      const { error: productsError } = await supabase
-        .from('user_products')
-        .delete()
-        .eq('user_id', user.id)
-        .in('user_supplier_id', [supplierId]);
-
-      if (productsError) throw productsError;
-
-      // Delete supplier
-      const { error: supplierError } = await supabase
-        .from('user_suppliers')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('supplier_id', supplierId);
-
-      if (supplierError) throw supplierError;
-
-      setSuppliers(prev => prev.filter(s => s.id !== supplierId));
-      toast({
-        title: "Fornecedor removido",
-        description: "Fornecedor excluído com sucesso!",
-        variant: "destructive",
-      });
-      if (activeTab === supplierId) {
-        setActiveTab(suppliers[0]?.id || '1');
-      }
-    } catch (error) {
-      console.error('Error deleting supplier:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir fornecedor.",
-        variant: "destructive",
-      });
+  const handleSupplierDelete = (supplierId: string) => {
+    setSuppliers(prev => prev.filter(s => s.id !== supplierId));
+    toast({
+      title: "Fornecedor removido",
+      description: "Fornecedor excluído com sucesso!",
+      variant: "destructive",
+    });
+    if (activeTab === supplierId) {
+      setActiveTab(suppliers[0]?.id || '1');
     }
   };
 
@@ -697,61 +569,24 @@ const Index = () => {
     setIsProductDialogOpen(true);
   };
 
-  const handleProductSave = async () => {
-    if (!user) return;
-
-    try {
-      const productId = `${editingSupplierId}-${Date.now()}`;
-      
-      // Get supplier's database ID
-      const { data: supplierData, error: supplierError } = await supabase
-        .from('user_suppliers')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('supplier_id', editingSupplierId)
-        .single();
-
-      if (supplierError) throw supplierError;
-
-      // Insert product into database
-      const { error } = await supabase
-        .from('user_products')
-        .insert({
-          user_id: user.id,
-          user_supplier_id: supplierData.id,
-          product_id: productId,
-          name: newProductName,
-          current_stock: 0,
-          order_quantity: 0
-        });
-
-      if (error) throw error;
-
-      const newProduct: Product = {
-        id: productId,
-        name: newProductName,
-        currentStock: 0,
-        orderQuantity: 0
-      };
-      
-      setSuppliers(prev => prev.map(s =>
-        s.id === editingSupplierId 
-          ? { ...s, products: [...s.products, newProduct] }
-          : s
-      ));
-      
-      toast({
-        title: "Produto adicionado",
-        description: "Novo produto adicionado com sucesso!",
-      });
-    } catch (error) {
-      console.error('Error saving product:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar produto.",
-        variant: "destructive",
-      });
-    }
+  const handleProductSave = () => {
+    const newProduct: Product = {
+      id: `${editingSupplierId}-${Date.now()}`,
+      name: newProductName,
+      currentStock: 0,
+      orderQuantity: 0
+    };
+    
+    setSuppliers(prev => prev.map(s =>
+      s.id === editingSupplierId 
+        ? { ...s, products: [...s.products, newProduct] }
+        : s
+    ));
+    
+    toast({
+      title: "Produto adicionado",
+      description: "Novo produto adicionado com sucesso!",
+    });
     
     setIsProductDialogOpen(false);
     setNewProductName('');
@@ -765,41 +600,22 @@ const Index = () => {
     setIsEditProductDialogOpen(true);
   };
 
-  const handleProductEditSave = async () => {
-    if (!user || !editingProduct) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .update({ name: editProductName })
-        .eq('user_id', user.id)
-        .eq('product_id', editingProduct.id);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === editingSupplierId
-          ? {
-              ...s,
-              products: s.products.map(p =>
-                p.id === editingProduct?.id ? { ...p, name: editProductName } : p
-              )
-            }
-          : s
-      ));
-      
-      toast({
-        title: "Produto atualizado",
-        description: "Nome do produto alterado com sucesso!",
-      });
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar produto.",
-        variant: "destructive",
-      });
-    }
+  const handleProductEditSave = () => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === editingSupplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === editingProduct?.id ? { ...p, name: editProductName } : p
+            )
+          }
+        : s
+    ));
+    
+    toast({
+      title: "Produto atualizado",
+      description: "Nome do produto alterado com sucesso!",
+    });
     
     setIsEditProductDialogOpen(false);
     setEditProductName('');
@@ -807,133 +623,57 @@ const Index = () => {
     setEditingSupplierId('');
   };
 
-  const handleProductDelete = async (supplierId: string, productId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === supplierId
-          ? { ...s, products: s.products.filter(p => p.id !== productId) }
-          : s
-      ));
-      toast({
-        title: "Produto removido",
-        description: "Produto excluído com sucesso!",
-        variant: "destructive",
-      });
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir produto.",
-        variant: "destructive",
-      });
-    }
+  const handleProductDelete = (supplierId: string, productId: string) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? { ...s, products: s.products.filter(p => p.id !== productId) }
+        : s
+    ));
+    toast({
+      title: "Produto removido",
+      description: "Produto excluído com sucesso!",
+      variant: "destructive",
+    });
   };
 
-  const handleStockChange = async (supplierId: string, productId: string, value: number) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .update({ current_stock: Math.max(0, value) })
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === supplierId
-          ? {
-              ...s,
-              products: s.products.map(p =>
-                p.id === productId ? { ...p, currentStock: Math.max(0, value) } : p
-              )
-            }
-          : s
-      ));
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar estoque.",
-        variant: "destructive",
-      });
-    }
+  const handleStockChange = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, currentStock: Math.max(0, value) } : p
+            )
+          }
+        : s
+    ));
   };
 
-  const handlePriceChange = async (supplierId: string, productId: string, value: number) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .update({ price: value })
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === supplierId
-          ? {
-              ...s,
-              products: s.products.map(p =>
-                p.id === productId ? { ...p, price: value } : p
-              )
-            }
-          : s
-      ));
-    } catch (error) {
-      console.error('Error updating price:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar preço.",
-        variant: "destructive",
-      });
-    }
+  const handlePriceChange = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, price: value } : p
+            )
+          }
+        : s
+    ));
   };
 
 
-  const handleUnitChange = async (supplierId: string, productId: string, value: 'UNIDADE' | 'FARDO' | 'CAIXA') => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .update({ unit: value })
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === supplierId
-          ? {
-              ...s,
-              products: s.products.map(p =>
-                p.id === productId ? { ...p, unit: value } : p
-              )
-            }
-          : s
-      ));
-    } catch (error) {
-      console.error('Error updating unit:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar unidade.",
-        variant: "destructive",
-      });
-    }
+  const handleUnitChange = (supplierId: string, productId: string, value: 'UNIDADE' | 'FARDO' | 'CAIXA') => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, unit: value } : p
+            )
+          }
+        : s
+    ));
   };
 
 
@@ -950,36 +690,17 @@ const Index = () => {
     setIsHistoryDialogOpen(true);
   };
 
-  const handleOrderChange = async (supplierId: string, productId: string, value: number) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_products')
-        .update({ order_quantity: Math.max(0, value) })
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setSuppliers(prev => prev.map(s =>
-        s.id === supplierId
-          ? {
-              ...s,
-              products: s.products.map(p =>
-                p.id === productId ? { ...p, orderQuantity: Math.max(0, value) } : p
-              )
-            }
-          : s
-      ));
-    } catch (error) {
-      console.error('Error updating order quantity:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar quantidade de pedido.",
-        variant: "destructive",
-      });
-    }
+  const handleOrderChange = (supplierId: string, productId: string, value: number) => {
+    setSuppliers(prev => prev.map(s =>
+      s.id === supplierId
+        ? {
+            ...s,
+            products: s.products.map(p =>
+              p.id === productId ? { ...p, orderQuantity: Math.max(0, value) } : p
+            )
+          }
+        : s
+    ));
   };
 
   const getTotalOrderItems = (supplier: Supplier) => {
