@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import type { OrdersDatabase } from './types';
 
 const ORDERS_SUPABASE_URL =
   import.meta.env.VITE_ORDERS_SUPABASE_URL ||
@@ -14,7 +13,7 @@ const ORDERS_SUPABASE_ANON_KEY =
  * (udeibydlmuuoecxfyxjt). Auth/session is intentionally NOT persisted here —
  * the main Supabase client (src/integrations/supabase/client.ts) handles login.
  */
-export const ordersSupabase = createClient<OrdersDatabase>(
+export const ordersSupabase = createClient(
   ORDERS_SUPABASE_URL,
   ORDERS_SUPABASE_ANON_KEY,
   {
