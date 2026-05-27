@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1135,6 +1135,45 @@ export type Database = {
           },
         ]
       }
+      machine_specifications: {
+        Row: {
+          base_price: number
+          category: string
+          created_at: string
+          id: string
+          import_cost: number
+          is_standard: boolean
+          lead_time_days: number
+          name: string
+          specifications: Json
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          category: string
+          created_at?: string
+          id?: string
+          import_cost?: number
+          is_standard?: boolean
+          lead_time_days?: number
+          name: string
+          specifications?: Json
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          category?: string
+          created_at?: string
+          id?: string
+          import_cost?: number
+          is_standard?: boolean
+          lead_time_days?: number
+          name?: string
+          specifications?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketing_analyses: {
         Row: {
           analysis_data: Json | null
@@ -1368,6 +1407,78 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      orders: {
+        Row: {
+          actual_ship_date: string | null
+          china_supplier: string | null
+          created_at: string
+          customs_cleared_date: string | null
+          delivery_date: string | null
+          estimated_ship_date: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          production_start_date: string | null
+          project_id: string | null
+          quote_id: string | null
+          status: string
+          total_amount: number
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_ship_date?: string | null
+          china_supplier?: string | null
+          created_at?: string
+          customs_cleared_date?: string | null
+          delivery_date?: string | null
+          estimated_ship_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          production_start_date?: string | null
+          project_id?: string | null
+          quote_id?: string | null
+          status?: string
+          total_amount?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_ship_date?: string | null
+          china_supplier?: string | null
+          created_at?: string
+          customs_cleared_date?: string | null
+          delivery_date?: string | null
+          estimated_ship_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          production_start_date?: string | null
+          project_id?: string | null
+          quote_id?: string | null
+          status?: string
+          total_amount?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_caregiver_shifts: {
         Row: {
@@ -1928,6 +2039,72 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          actual_delivery: string | null
+          created_at: string
+          custom_specifications: Json | null
+          estimated_cost: number | null
+          estimated_delivery: string | null
+          final_cost: number | null
+          id: string
+          lead_id: string | null
+          machine_specification_id: string | null
+          name: string
+          notes: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          actual_delivery?: string | null
+          created_at?: string
+          custom_specifications?: Json | null
+          estimated_cost?: number | null
+          estimated_delivery?: string | null
+          final_cost?: number | null
+          id?: string
+          lead_id?: string | null
+          machine_specification_id?: string | null
+          name: string
+          notes?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_delivery?: string | null
+          created_at?: string
+          custom_specifications?: Json | null
+          estimated_cost?: number | null
+          estimated_delivery?: string | null
+          final_cost?: number | null
+          id?: string
+          lead_id?: string | null
+          machine_specification_id?: string | null
+          name?: string
+          notes?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_machine_specification_id_fkey"
+            columns: ["machine_specification_id"]
+            isOneToOne: false
+            referencedRelation: "machine_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_tags: {
         Row: {
           prompt_id: string
@@ -1997,7 +2174,7 @@ export type Database = {
         Row: {
           company_id: string
           content: string
-          content_search: unknown | null
+          content_search: unknown
           created_at: string
           id: string
           last_viewed_at: string | null
@@ -2008,7 +2185,7 @@ export type Database = {
         Insert: {
           company_id: string
           content: string
-          content_search?: unknown | null
+          content_search?: unknown
           created_at?: string
           id?: string
           last_viewed_at?: string | null
@@ -2019,7 +2196,7 @@ export type Database = {
         Update: {
           company_id?: string
           content?: string
-          content_search?: unknown | null
+          content_search?: unknown
           created_at?: string
           id?: string
           last_viewed_at?: string | null
@@ -2033,6 +2210,135 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          ai_generated_specs: Json | null
+          base_cost: number
+          created_at: string
+          custom_requirements: string | null
+          id: string
+          import_cost: number
+          lead_id: string | null
+          machine_specification_id: string | null
+          margin_percentage: number
+          project_id: string | null
+          status: string
+          total_cost: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          ai_generated_specs?: Json | null
+          base_cost?: number
+          created_at?: string
+          custom_requirements?: string | null
+          id?: string
+          import_cost?: number
+          lead_id?: string | null
+          machine_specification_id?: string | null
+          margin_percentage?: number
+          project_id?: string | null
+          status?: string
+          total_cost?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          ai_generated_specs?: Json | null
+          base_cost?: number
+          created_at?: string
+          custom_requirements?: string | null
+          id?: string
+          import_cost?: number
+          lead_id?: string | null
+          machine_specification_id?: string | null
+          margin_percentage?: number
+          project_id?: string | null
+          status?: string
+          total_cost?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_machine_specification_id_fkey"
+            columns: ["machine_specification_id"]
+            isOneToOne: false
+            referencedRelation: "machine_specifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          actual_arrival: string | null
+          carrier: string | null
+          created_at: string
+          customs_status: string | null
+          destination_port: string | null
+          estimated_arrival: string | null
+          id: string
+          order_id: string | null
+          origin_port: string | null
+          ship_date: string | null
+          status: string
+          tracking_number: string
+          updated_at: string
+        }
+        Insert: {
+          actual_arrival?: string | null
+          carrier?: string | null
+          created_at?: string
+          customs_status?: string | null
+          destination_port?: string | null
+          estimated_arrival?: string | null
+          id?: string
+          order_id?: string | null
+          origin_port?: string | null
+          ship_date?: string | null
+          status?: string
+          tracking_number: string
+          updated_at?: string
+        }
+        Update: {
+          actual_arrival?: string | null
+          carrier?: string | null
+          created_at?: string
+          customs_status?: string | null
+          destination_port?: string | null
+          estimated_arrival?: string | null
+          id?: string
+          order_id?: string | null
+          origin_port?: string | null
+          ship_date?: string | null
+          status?: string
+          tracking_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2408,18 +2714,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_company_id: {
-        Args: { user_id: string }
-        Returns: string
-      }
-      increment_view_count: {
-        Args: { row_id: string }
-        Returns: number
-      }
-      initialize_user_data: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
+      get_user_company_id: { Args: { user_id: string }; Returns: string }
+      increment_view_count: { Args: { row_id: string }; Returns: number }
+      initialize_user_data: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin"
