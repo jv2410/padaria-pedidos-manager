@@ -22,6 +22,7 @@ import { MobileSupplierCard } from "@/components/mobile/MobileSupplierCard";
 import { MobileProductList } from "@/components/mobile/MobileProductList";
 import { MobileNavigation } from "@/components/mobile/MobileNavigation";
 import { MobileHistoryList } from "@/components/mobile/MobileHistoryList";
+import { OrdersDbStatus } from "@/components/OrdersDbStatus";
 
 interface Product {
   id: string;
@@ -948,6 +949,7 @@ const Index = () => {
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">{user?.email}</span>
             </div>
+            <OrdersDbStatus />
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sair
